@@ -23,7 +23,7 @@ public class Stars {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] values = line.split(",");
-                points.add(new Point(Integer.parseInt(values[0]),Integer.parseInt(values[1]));
+                points.add(new Point(Integer.parseInt(values[0]),Integer.parseInt(values[1])));
             }
         }
         catch (Exception e) {
