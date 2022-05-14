@@ -18,6 +18,11 @@ public class Stars {
         stars.search(stars.readFile(args[0]), Integer.parseInt(args[1]));
     }
 
+    /**
+     * Reads in the points from a CSV file
+     * @param filename The name of the file containing the points
+     * @return A list off all the points in the file
+     */
     private ArrayList<Point> readFile(String filename) {
         ArrayList<Point> allPoints = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
@@ -35,11 +40,17 @@ public class Stars {
         return allPoints;
     }
 
-    private void search(ArrayList<Point> points, int startIndex) {
-        TreeMap<Double, Path> pathMap = initializePath(points, startIndex);
+    private void search(ArrayList<Point> allPoints, int startIndex) {
+        TreeMap<Double, Path> pathMap = initializePath(allPoints, startIndex);
         //TODO: actually search
     }
 
+    /**
+     * Initializes the first path, containing only the start point
+     * @param points A list off all the points on the graph
+     * @param startIndex The index of the starting point
+     * @return A map to be used to contain all the paths and keep them in sorted order
+     */
     private TreeMap<Double, Path> initializePath(ArrayList<Point> points, int startIndex){
         TreeMap<Double, Path> pathMap = new TreeMap<>();
         goal = points.get(points.size() - 1);
@@ -157,12 +168,12 @@ public class Stars {
         @Override
         public int compareTo(Path comparePath) {
             if (this.getfValue() > comparePath.getfValue()) {
-                return 1;
+                return -1; //Returns -1 if the f value for this path is smaller than that of the given path (to give ascending order)
             }
             else if (this.getfValue() == comparePath.getfValue()){
                 return 0;
             }
-            else return -1;
+            else return 1; //Returns 1 if the f value for this path is larger than that of the given path (to give ascending order)
         }
     }
 }
