@@ -35,11 +35,13 @@ public class Stars {
     }
 
     private void search(ArrayList<Point> points) {
-        initializePaths();
+        initializePath(points);
+        //TODO: actually search
     }
 
-    private ArrayList<Path> initializePaths(){
-
+    private ArrayList<Path> initializePath(ArrayList<Point> points){
+        goal = points.get(points.size() - 1);
+        //TODO: actually make the first path
     }
 
     static public class Path {
