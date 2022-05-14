@@ -2,6 +2,7 @@ import java.awt.Point;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.TreeMap;
 
 /**
  * Stars
@@ -14,7 +15,7 @@ public class Stars {
             throw new IllegalArgumentException("Usage: java Stars <galaxy_csv_filename> <start_index> <end_index> <D>");
         }
         Stars stars = new Stars();
-        stars.search(stars.readFile(args[0]));
+        stars.search(stars.readFile(args[0]), Integer.parseInt(args[1]));
     }
 
     private ArrayList<Point> readFile(String filename) {
@@ -34,17 +35,20 @@ public class Stars {
         return allPoints;
     }
 
-    private void search(ArrayList<Point> points) {
-        initializePath(points);
+    private void search(ArrayList<Point> points, int startIndex) {
+        TreeMap<Double, Path> pathMap = initializePath(points, startIndex);
         //TODO: actually search
     }
 
-    private ArrayList<Path> initializePath(ArrayList<Point> points){
+    private TreeMap<Double, Path> initializePath(ArrayList<Point> points, int startIndex){
+        TreeMap<Double, Path> pathMap = new TreeMap<>();
         goal = points.get(points.size() - 1);
-        //TODO: actually make the first path
+        Path firstPath = new Path(points.get(startIndex));
+        pathMap.put(firstPath.getfValue(), firstPath);
+        return pathMap;
     }
 
-    static public class Path {
+    public class Path implements Comparable<Path> {
         /**
          * The points contaied in this path
          */
@@ -148,6 +152,17 @@ public class Stars {
 
         public double getfValue() {
             return _cost + _heuristic;
+        }
+
+        @Override
+        public int compareTo(Path comparePath) {
+            if (this.getfValue() > comparePath.getfValue()) {
+                return 1;
+            }
+            else if (this.getfValue() == comparePath.getfValue()){
+                return 0;
+            }
+            else return -1;
         }
     }
 }
