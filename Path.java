@@ -1,7 +1,7 @@
 import java.awt.Point;
 import java.util.ArrayList;
 
-public class Path implements Comparable<Path> {
+public class Path implements Comparable<Path>, Cloneable {
     /**
      * The points contaied in this path
      */
@@ -94,5 +94,12 @@ public class Path implements Comparable<Path> {
             return 0;
         }
         else return 1; //Returns 1 if the f value for this path is larger than that of the given path (to give ascending order)
+    }
+
+    public void print(){
+        for (Point point : _points) {
+            System.out.println(point.getX() + "," + point.getY());
+        }
+        System.out.println("C: " + _cost);
     }
 }

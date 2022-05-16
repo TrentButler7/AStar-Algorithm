@@ -2,6 +2,7 @@ import java.awt.Point;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -21,7 +22,11 @@ public class Stars {
         Stars stars = new Stars();
         _allPoints = stars.readFile(args[0]);
         _maxD = Integer.parseInt(args[3]);
-        stars.search(_allPoints, Integer.parseInt(args[1]));
+        Path finalPath = stars.search(_allPoints, Integer.parseInt(args[1]));
+        if (finalPath != null) {
+            finalPath.print();
+        }
+        else System.out.println("No Path found");
     }
 
     /**
@@ -35,7 +40,9 @@ public class Stars {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] values = line.split(",");
-                allPoints.add(new Point(Integer.parseInt(values[0]),Integer.parseInt(values[1]))); 
+                double d1 = Double.parseDouble(values[0]) * 100;
+                double d2 = Double.parseDouble(values[1]) * 100;
+                allPoints.add(new Point((int)d1,(int)d2)); 
             }
         }
         catch (Exception e) {
@@ -85,15 +92,16 @@ public class Stars {
      */
     private TreeMap<Double, Path> expand(TreeMap<Double, Path> pathMap){
         Path currentPath = pathMap.firstEntry().getValue();
+        pathMap.remove(currentPath.getfValue());
         for (int i = 0; i < _allPoints.size(); i++) {
             Point newPoint = _allPoints.get(i);
             //Checks if the current path includes the point, if so move on since we dont want to get into a loop
             if (currentPath.getList().contains(newPoint)) {
-                break;
+                continue;
             }
             //Checks if the point is within the Max distance
             else if (Util.getEuclidean(currentPath.getList().get(currentPath.getList().size() - 1), newPoint) > _maxD) {
-                break;
+                continue;
             }
 
             Path newPath = null;
@@ -107,17 +115,26 @@ public class Stars {
             }
             
             //Checks through every path to see if we already have a path leading to this point
-            for (Map.Entry<Double, Path> mapPath : pathMap.entrySet()) {
-                ArrayList<Point> pathList = mapPath.getValue().getList();
+            // for ( mapPath : pathMap.entrySet()) {
+                
+            // }
+
+            Iterator<Map.Entry<Double, Path>> iterator = pathMap.entrySet().iterator();
+
+            while(iterator.hasNext()){
+                Map.Entry<Double, Path> entry = iterator.next();
+                ArrayList<Point> pathList = entry.getValue().getList();
                 if(pathList.get(pathList.size() - 1).equals(newPoint)){
-                    if (newPath.getfValue() < mapPath.getValue().getfValue()) { //If the new path is better, add it to the map and remove the old path
+                    if (newPath.getfValue() < entry.getValue().getfValue()) { //If the new path is better, add it to the map and remove the old path
                         pathMap.put(newPath.getfValue(), newPath);
-                        pathMap.remove(mapPath.getKey());
+                        pathMap.remove(entry.getKey());
                         break;
                     }
                     else break; //If the old path is better, move on without adding the new path
                 }
             }
+
+            pathMap.put(newPath.getfValue(), newPath);
         }
 
         return pathMap;

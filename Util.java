@@ -7,7 +7,7 @@ public class Util {
      * @param point2 The second point
      * @return The estimate of the Euclidean distance
      */
-    static public int getEuclidean(Point point1, Point point2) {
+    static public double getEuclidean(Point point1, Point point2) {
         //return Math.sqrt((currentPoint.getY() - goal.getY()) * (currentPoint.getY() - goal.getY()) + (currentPoint.getX() - goal.getX()) * (currentPoint.getX() - goal.getX())); Actual Euclidean distace calc
         int x = (int)point1.getX() - (int)point2.getX();
         int y = (int)point1.getY() - (int)point2.getY();
@@ -22,7 +22,8 @@ public class Util {
             max = y;
             min = x;
         }
-        return (1007 / 1024) * max + (441/1024) * min;
+        double result = (1007.0 / 1024.0) * max + (441.0 / 1024.0) * min;
+        return result;
     }
 
 }
