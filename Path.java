@@ -17,7 +17,7 @@ public class Path implements Comparable<Path> {
     public Path(Point first, Point goal){
         _points = new ArrayList<>();
         _points.add(first);
-        _heuristic = getEuclidean(first, goal);
+        _heuristic = Util.getEuclidean(first, goal);
         _cost = 0; //added only the start points, have not travelled
         _goal = goal;
     }
@@ -32,8 +32,8 @@ public class Path implements Comparable<Path> {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        _heuristic = getEuclidean(_points.get(_points.size() - 1), _goal);
-        _cost = getEuclidean(_points.get(_points.size() - 1) , _points.get(_points.size() - 2)); 
+        _heuristic = Util.getEuclidean(_points.get(_points.size() - 1), _goal);
+        _cost = Util.getEuclidean(_points.get(_points.size() - 1) , _points.get(_points.size() - 2)); 
     }
 
     /**
@@ -42,30 +42,6 @@ public class Path implements Comparable<Path> {
      */
     public ArrayList<Point> getList() {
         return _points;
-    }
-
-    /**
-     * Fast Euclidean estimate calculation, using https://www.flipcode.com/archives/Fast_Approximate_Distance_Functions.shtml
-     * @param point1 The first point
-     * @param point2 The second point
-     * @return The estimate of the Euclidean distance
-     */
-    public int getEuclidean(Point point1, Point point2) {
-        //return Math.sqrt((currentPoint.getY() - goal.getY()) * (currentPoint.getY() - goal.getY()) + (currentPoint.getX() - goal.getX()) * (currentPoint.getX() - goal.getX())); Actual Euclidean distace calc
-        int x = (int)point1.getX() - (int)point2.getX();
-        int y = (int)point1.getY() - (int)point2.getY();
-        x = Math.abs(x);
-        y = Math. abs(y);
-        int max = 0, min = 0;
-        if(x > y){
-            max = x;
-            min = y;
-        }
-        else{
-            max = y;
-            min = x;
-        }
-        return (1007 / 1024) * max + (441/1024) * min;
     }
 
     /**
@@ -101,8 +77,8 @@ public class Path implements Comparable<Path> {
      */
     public void add(Point point){
         _points.add(point);
-        _heuristic = getEuclidean(point, _goal);
-        _cost += getEuclidean(point, _points.get(_points.size() - 2)); //-2 since we want the latest point and the previous point since that was the last distance travelled
+        _heuristic = Util.getEuclidean(point, _goal);
+        _cost += Util.getEuclidean(point, _points.get(_points.size() - 2)); //-2 since we want the latest point and the previous point since that was the last distance travelled
     }
 
     public double getfValue() {
