@@ -3,6 +3,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -11,56 +12,93 @@ import java.util.TreeMap;
  */
 public class Stars {
 
+    private final List<Point> _allPoints;
+
     private Point _goal;
-    static private ArrayList<Point> _allPoints;
-    static private int _maxD = 0;
+    private int _maxD = 0;
+
+    public Stars(List<Point> starPoints) {
+        _allPoints = starPoints;
+    }
     
     public static void main(String[] args) {
         if (args.length != 4) {
             throw new IllegalArgumentException("Usage: java Stars <galaxy_csv_filename> <start_index> <end_index> <D>");
         }
-        Stars stars = new Stars();
-        _allPoints = stars.readFile(args[0]);
-        _maxD = Integer.parseInt(args[3]);
-        Path finalPath = stars.search(_allPoints, Integer.parseInt(args[1]));
+
+        Stars stars = Stars.CreateFromFile(args[0]);
+        if (stars == null) {
+            return;
+        }
+
+        int startIndex, endIndex, maxTravelDistance;
+        try {
+            startIndex = Integer.parseInt(args[1]);
+            endIndex = Integer.parseInt(args[2]);
+            maxTravelDistance = Integer.parseInt(args[3]);
+        }
+        catch (Exception ex) {
+            System.err.println("Failed to parse one of either: start_index, end_index, D. Please subsitute these parameters with valid integers.");
+            ex.printStackTrace();
+
+            return;
+        }
+
+        Path finalPath = stars.search(startIndex, endIndex, maxTravelDistance);
         if (finalPath != null) {
             finalPath.print();
         }
-        else System.out.println("No Path found");
+        else {
+            System.out.println("No Path found");
+        }
     }
 
     /**
-     * Reads in the points from a CSV file
-     * @param filename The name of the file containing the points
-     * @return A list off all the points in the file
+     * Reads a list of star points from the given CSV file
+     * and creates a new instance of the Stars object.
+     * @param fileName The path of the file containing the star points.
+     * @return A new Stars instance, or null if the creation failed.
      */
-    private ArrayList<Point> readFile(String filename) {
-        ArrayList<Point> allPoints = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
+    public static Stars CreateFromFile(String fileName) {
+        ArrayList<Point> starPoints = new ArrayList<>();
+
+        try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
             String line;
+
             while ((line = br.readLine()) != null) {
                 String[] values = line.split(",");
                 double d1 = Double.parseDouble(values[0]) * 100;
                 double d2 = Double.parseDouble(values[1]) * 100;
-                allPoints.add(new Point((int)d1,(int)d2)); 
+                starPoints.add(new Point((int)d1,(int)d2));
             }
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-        _goal = allPoints.get(allPoints.size() - 1);
 
-        return allPoints;
+            return new Stars(starPoints);
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
+        }
     }
 
     /**
      * Starts the search for the goal using the A* algorithm
-     * @param allPoints A list of all of the possible points on the graph
      * @param startIndex THe index of the starting point
      * @return The value of the optimal path if one is found
      */
-    private Path search(ArrayList<Point> allPoints, int startIndex) {
-        TreeMap<Double, Path> pathMap = initializePath(allPoints, startIndex);
+    private Path search(int startIndex, int goalIndex, int maxTravelDistance) {
+        if (startIndex < 0) {
+            throw new IllegalArgumentException("startIndex must not be negative.");
+        }
+
+        if (goalIndex < 0) {
+            throw new IllegalArgumentException("goalIndex must not be negative.");
+        }
+
+        if (maxTravelDistance <= 0) {
+            throw new IllegalArgumentException("maxTravelDistance must be greater than zero.");
+        }
+
+        TreeMap<Double, Path> pathMap = initializePath(_allPoints, startIndex);
         while (pathMap.size() > 0) {
             Path currentPath = pathMap.firstEntry().getValue();
             if(checkPath(currentPath)){
@@ -107,12 +145,8 @@ public class Stars {
             Path newPath = null;
 
             //Adds the new point to a path
-            try {
-                newPath = (Path)currentPath.clone();
-                newPath.add(newPoint);
-            } catch (CloneNotSupportedException e) {
-                e.printStackTrace();
-            }
+            newPath = (Path)currentPath.clone();
+            newPath.add(newPoint);
             
             //Checks through every path to see if we already have a path leading to this point
             // for ( mapPath : pathMap.entrySet()) {
@@ -146,7 +180,7 @@ public class Stars {
      * @param startIndex The index of the starting point
      * @return A map to be used to contain all the paths and keep them in sorted order
      */
-    private TreeMap<Double, Path> initializePath(ArrayList<Point> points, int startIndex){
+    private TreeMap<Double, Path> initializePath(List<Point> points, int startIndex){
         TreeMap<Double, Path> pathMap = new TreeMap<>();
         _goal = points.get(points.size() - 1);
         Path firstPath = new Path(points.get(startIndex), _goal);

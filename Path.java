@@ -3,7 +3,7 @@ import java.util.ArrayList;
 
 public class Path implements Comparable<Path>, Cloneable {
     /**
-     * The points contaied in this path
+     * The points contained in this path
      */
     private ArrayList<Point> _points; 
     private double _heuristic;
@@ -27,11 +27,7 @@ public class Path implements Comparable<Path>, Cloneable {
      * @param path The path to be copied
      */
     public Path(Path path) { //! might need to be changed to add new point in this method
-        try {
-            _points = ((Path)path.clone()).getList();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        _points = (ArrayList<Point>)path.getList().clone();
         _heuristic = Util.getEuclidean(_points.get(_points.size() - 1), _goal);
         _cost = Util.getEuclidean(_points.get(_points.size() - 1) , _points.get(_points.size() - 2)); 
     }
@@ -45,30 +41,21 @@ public class Path implements Comparable<Path>, Cloneable {
     }
 
     /**
-     * Allows for the Path to be cloneed correctly including the list of the path
+     * Clones this Path object, with a shallow copy of the point list.
      */
     @Override
-    protected Object clone() throws CloneNotSupportedException {
+    protected Object clone() {
         Path clone = null;
         try
         {
             clone = (Path) super.clone();
-            //Copy new List to cloned method
-            clone.setList((ArrayList<Point>) this.getList().clone());
-        } 
+            clone._points = (ArrayList<Point>)this.getList().clone();
+        }
         catch (CloneNotSupportedException e) 
         {
             e.printStackTrace();
         }
         return clone;
-    }
-
-    /**
-     * Sets the list of current path
-     * @param list The list that the current one will match
-     */
-    private void setList(ArrayList<Point> list) {
-        _points = list;
     }
 
     /**
@@ -81,22 +68,25 @@ public class Path implements Comparable<Path>, Cloneable {
         _cost += Util.getEuclidean(point, _points.get(_points.size() - 2)); //-2 since we want the latest point and the previous point since that was the last distance travelled
     }
 
-    public double getfValue() {
+    public Double getfValue() {
         return _cost + _heuristic;
     }
 
     @Override
     public int compareTo(Path comparePath) {
-        if (this.getfValue() > comparePath.getfValue()) {
-            return -1; //Returns -1 if the f value for this path is smaller than that of the given path (to give ascending order)
-        }
-        else if (this.getfValue() == comparePath.getfValue()){
-            return 0;
-        }
-        else return 1; //Returns 1 if the f value for this path is larger than that of the given path (to give ascending order)
+        // Negate the comparison as we want smaller F-values to be placed at the top of the queue.
+        return 0 - this.getfValue().compareTo(comparePath.getfValue());
+
+        // if (myFValue > theirFValue) {
+        //     return -1; //Returns -1 if the f value for this path is smaller than that of the given path (to give ascending order)
+        // }
+        // else if (myFValue == theirFValue){
+        //     return 0;
+        // }
+        // else return 1; //Returns 1 if the f value for this path is larger than that of the given path (to give ascending order)
     }
 
-    public void print(){
+    public void print() {
         for (Point point : _points) {
             System.out.println(point.getX() + "," + point.getY());
         }
