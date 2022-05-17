@@ -99,7 +99,7 @@ public class Stars {
         }
 
         _goal = _allPoints.get(goalIndex);
-        _maxD = maxTravelDistance;
+        _maxD = maxTravelDistance * 100;
 
         TreeMap<Double, Path> pathMap = initializePath(_allPoints, startIndex);
         while (pathMap.size() > 0) {
