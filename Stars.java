@@ -11,7 +11,7 @@ import java.util.TreeMap;
  */
 public class Stars {
 
-    private Point _goal;
+    static private Point _goal;
     static private ArrayList<Point> _allPoints;
     static private int _maxD = 0;
     
@@ -21,7 +21,8 @@ public class Stars {
         }
         Stars stars = new Stars();
         _allPoints = stars.readFile(args[0]);
-        _maxD = Integer.parseInt(args[3]);
+        _goal = _allPoints.get(Integer.parseInt(args[2]));
+        _maxD = Integer.parseInt(args[3]) * 100;
         Path finalPath = stars.search(_allPoints, Integer.parseInt(args[1]));
         if (finalPath != null) {
             finalPath.print();
@@ -48,7 +49,6 @@ public class Stars {
         catch (Exception e) {
             e.printStackTrace();
         }
-        _goal = allPoints.get(allPoints.size() - 1);
 
         return allPoints;
     }
@@ -148,7 +148,6 @@ public class Stars {
      */
     private TreeMap<Double, Path> initializePath(ArrayList<Point> points, int startIndex){
         TreeMap<Double, Path> pathMap = new TreeMap<>();
-        _goal = points.get(points.size() - 1);
         Path firstPath = new Path(points.get(startIndex), _goal);
         pathMap.put(firstPath.getfValue(), firstPath);
         return pathMap;
