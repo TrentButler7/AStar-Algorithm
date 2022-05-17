@@ -98,6 +98,9 @@ public class Stars {
             throw new IllegalArgumentException("maxTravelDistance must be greater than zero.");
         }
 
+        _goal = _allPoints.get(goalIndex);
+        _maxD = maxTravelDistance;
+
         TreeMap<Double, Path> pathMap = initializePath(_allPoints, startIndex);
         while (pathMap.size() > 0) {
             Path currentPath = pathMap.firstEntry().getValue();
@@ -182,7 +185,6 @@ public class Stars {
      */
     private TreeMap<Double, Path> initializePath(List<Point> points, int startIndex){
         TreeMap<Double, Path> pathMap = new TreeMap<>();
-        _goal = points.get(points.size() - 1);
         Path firstPath = new Path(points.get(startIndex), _goal);
         pathMap.put(firstPath.getfValue(), firstPath);
         return pathMap;

@@ -88,8 +88,11 @@ public class Path implements Comparable<Path>, Cloneable {
 
     public void print() {
         for (Point point : _points) {
-            System.out.println(point.getX() + "," + point.getY());
+            double x = point.getX() / 100.0;
+            double y = point.getY() / 100.0;
+            System.out.println(x + "," + y);
         }
+        _cost /= 100;
         System.out.println("C: " + _cost);
     }
 }
