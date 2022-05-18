@@ -70,6 +70,7 @@ public class Path implements Comparable<Path>, Cloneable {
      * Clones this Path object, with a shallow copy of the point list.
      */
     @Override
+    @SuppressWarnings("unchecked")
     protected Object clone() {
         try {
             Path clone = (Path)super.clone();
