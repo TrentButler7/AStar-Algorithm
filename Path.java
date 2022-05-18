@@ -23,16 +23,6 @@ public class Path implements Comparable<Path>, Cloneable {
     }
 
     /**
-     * Creates a new path, cloning another path
-     * @param path The path to be copied
-     */
-    public Path(Path path) { //! might need to be changed to add new point in this method
-        _points = (ArrayList<Point>)path.getPoints().clone();
-        _heuristic = Util.getEuclidean(_points.get(_points.size() - 1), _goal);
-        _cost = Util.getEuclidean(_points.get(_points.size() - 1) , _points.get(_points.size() - 2)); 
-    }
-
-    /**
      * Gets the the list of points in the path
      * @return The ArrayList of points in the current path
      */
@@ -44,42 +34,59 @@ public class Path implements Comparable<Path>, Cloneable {
         return (Point)_goal.clone();
     }
 
+    public Double getFValue() {
+        return _cost + _heuristic;
+    }
+
     /**
-     * Clones this Path object, with a shallow copy of the point list.
+     * Gets the last (most recent) point in the path.
+     * @return The last point to be added to the path.
      */
-    @Override
-    protected Object clone() {
-        Path clone = null;
-        try
-        {
-            clone = (Path) super.clone();
-            clone._points = (ArrayList<Point>)this.getPoints().clone();
-        }
-        catch (CloneNotSupportedException e) 
-        {
-            e.printStackTrace();
-        }
-        return clone;
+    public Point getLastPoint() {
+        return _points.get(_points.size() - 1);
     }
 
     /**
      * Adds a new point to a path and calculates the new cost and heuristic
      * @param point
      */
-    public void add(Point point){
+    public void add(Point point) {
         _points.add(point);
         _heuristic = Util.getEuclidean(point, _goal);
         _cost += Util.getEuclidean(point, _points.get(_points.size() - 2)); //-2 since we want the latest point and the previous point since that was the last distance travelled
     }
 
-    public Double getfValue() {
-        return _cost + _heuristic;
+    /**
+     * Checks to see if the final node in the path is
+     * equivalent to the goal, thereby indicating that
+     * the path is complete.
+     * @return True if the path has reached the goal, otherwise false.
+     */
+    public boolean isAtGoal() {
+        return getLastPoint().equals(_goal);
+    }
+
+    /**
+     * Clones this Path object, with a shallow copy of the point list.
+     */
+    @Override
+    protected Object clone() {
+        try {
+            Path clone = (Path)super.clone();
+            clone._points = (ArrayList<Point>)this.getPoints().clone();
+
+            return clone;
+        }
+        catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     @Override
     public int compareTo(Path comparePath) {
-        // Negate the comparison as we want smaller F-values to be placed at the top of the queue.
-        return 0 - this.getfValue().compareTo(comparePath.getfValue());
+        // Negate the comparison as smaller F-values are more desirable
+        return 0 - this.getFValue().compareTo(comparePath.getFValue());
     }
 
     public void print() {

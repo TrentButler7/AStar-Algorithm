@@ -107,26 +107,16 @@ public class Stars {
         TreeMap<Double, Path> pathMap = initializePath(_allPoints, startIndex);
         while (pathMap.size() > 0) {
             Path currentPath = pathMap.firstEntry().getValue();
-            if(checkPath(currentPath)){
-                return currentPath; //if the Path has reached the goal, return the path
+            if(currentPath.isAtGoal()) {
+                return currentPath;
             }
-            pathMap = expand(pathMap); //otherwise, expand the search
+
+            // We haven't reached the goal yet, so expand the frontier
+            pathMap = expand(pathMap);
         }
 
+        // The pathmap emptied without the goal being reached
         return null;
-    }
-
-    /**
-     * Checks if a path has reached the goal
-     * @param path The path to be checked
-     * @return If the Path did indeed contain a goal
-     */
-    private Boolean checkPath(Path path){
-        ArrayList<Point> pathList = path.getPoints();
-        if (pathList.get(pathList.size() - 1) == _goal) {
-            return true;
-        }
-        else return false;
     }
 
     /**
@@ -134,47 +124,45 @@ public class Stars {
      * @param pathMap The map of paths to be expanded
      * @return The expanded pathMap
      */
-    private TreeMap<Double, Path> expand(TreeMap<Double, Path> pathMap){
+    private TreeMap<Double, Path> expand(TreeMap<Double, Path> pathMap) {
+        // Dequeue the path to investigate
         Path currentPath = pathMap.firstEntry().getValue();
-        pathMap.remove(currentPath.getfValue());
-        for (int i = 0; i < _allPoints.size(); i++) {
-            Point newPoint = _allPoints.get(i);
-            //Checks if the current path includes the point, if so move on since we dont want to get into a loop
+        pathMap.remove(currentPath.getFValue());
+
+        for (Point newPoint: _allPoints) {
+            // Ensure that the point isn't already in the path.
+            // Prevents us from creating a looping path
             if (currentPath.getPoints().contains(newPoint)) {
                 continue;
             }
-            //Checks if the point is within the Max distance
-            else if (Util.getEuclidean(currentPath.getPoints().get(currentPath.getPoints().size() - 1), newPoint) > _maxD) {
+
+            // Check that this point is within range of the edge of the path
+            if (Util.getEuclidean(currentPath.getLastPoint(), newPoint) > _maxD) {
                 continue;
             }
 
-            Path newPath = null;
-
-            //Adds the new point to a path
-            newPath = (Path)currentPath.clone();
+            // At this point we can investigate a new valid path
+            Path newPath = (Path)currentPath.clone();
             newPath.add(newPoint);
-            
-            //Checks through every path to see if we already have a path leading to this point
-            // for ( mapPath : pathMap.entrySet()) {
-                
-            // }
 
-            Iterator<Map.Entry<Double, Path>> iterator = pathMap.entrySet().iterator();
-
-            while(iterator.hasNext()){
-                Map.Entry<Double, Path> entry = iterator.next();
-                ArrayList<Point> pathList = entry.getValue().getPoints();
-                if(pathList.get(pathList.size() - 1).equals(newPoint)){
-                    if (newPath.getfValue() < entry.getValue().getfValue()) { //If the new path is better, add it to the map and remove the old path
-                        pathMap.put(newPath.getfValue(), newPath);
-                        pathMap.remove(entry.getKey());
-                        break;
-                    }
-                    else break; //If the old path is better, move on without adding the new path
+            for (Path element : pathMap.values()) {
+                // Attempt to find an existing path that leads to the new point
+                if (!element.getLastPoint().equals(newPoint)) {
+                    continue;
                 }
+
+                // Is our new path better than the old path?
+                if (element.getFValue() < newPath.getFValue()) {
+                    break;
+                }
+
+                // Replace with the more efficient path
+                pathMap.put(newPath.getFValue(), newPath);
+                pathMap.remove(element.getFValue());
+                break;
             }
 
-            pathMap.put(newPath.getfValue(), newPath);
+            pathMap.put(newPath.getFValue(), newPath);
         }
 
         return pathMap;
@@ -189,7 +177,7 @@ public class Stars {
     private TreeMap<Double, Path> initializePath(List<Point> points, int startIndex){
         TreeMap<Double, Path> pathMap = new TreeMap<>();
         Path firstPath = new Path(points.get(startIndex), _goal);
-        pathMap.put(firstPath.getfValue(), firstPath);
+        pathMap.put(firstPath.getFValue(), firstPath);
         return pathMap;
     }
 }
