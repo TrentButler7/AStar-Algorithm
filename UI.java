@@ -86,6 +86,8 @@ public class UI extends Frame {
     }
 
     private class MyCanvas extends Canvas {
+        private static final int GALAXY_BORDER = 30;
+
         private final List<DPoint> _starPoints;
         private final Path _path;
         private final int _maxTravelDistance;
@@ -99,23 +101,12 @@ public class UI extends Frame {
         }
 
         @Override
-        public Dimension getSize() {
-            Dimension d = super.getSize();
-
-            // Give ourselves a fake border
-            d.width -= 20;
-            d.height -=20;
-
-            return d;
-        }
-
-        @Override
         public void paint(Graphics g) {
             Graphics2D g2 = (Graphics2D)g;
             Dimension d = this.getSize();
 
-            double scaleX = d.getWidth() / _galaxyDimension.getX();
-            double scaleY = d.getHeight() / _galaxyDimension.getY();
+            double scaleX = (d.getWidth() - GALAXY_BORDER * 2) / _galaxyDimension.getX();
+            double scaleY = (d.getHeight() - GALAXY_BORDER * 2) / _galaxyDimension.getY();
             _scaleFactor = scaleY;
             if (scaleX < scaleY) {
                 _scaleFactor = scaleX;
@@ -142,6 +133,8 @@ public class UI extends Frame {
             for (int i = 1; i < pathPoints.size() - 1; i++) {
                 drawStar(g2, pathPoints.get(i), Color.WHITE, 4);
             }
+
+            drawScale(g2);
         }
 
         private void drawPath(Graphics2D g2) {
@@ -173,18 +166,14 @@ public class UI extends Frame {
             g2.setFont(font);
             g2.setColor(Color.BLACK);
 
-            g2.drawChars(
-                "S".toCharArray(),
-                0,
-                1,
+            g2.drawString(
+                "S",
                 getStarX(start) - 6,
                 getStarY(start) + 8
             );
 
-            g2.drawChars(
-                "G".toCharArray(),
-                0,
-                1,
+            g2.drawString(
+                "G",
                 getStarX(_path.getGoal()) - 8,
                 getStarY(_path.getGoal()) + 8
             );
@@ -200,6 +189,30 @@ public class UI extends Frame {
             g2.drawOval(getStarX(start) - mdx, getStarY(start) - mdy, mdx * 2, mdy * 2);
         }
 
+        private void drawScale(Graphics2D g2) {
+            int xCount = (int)Math.ceil(_galaxyDimension.x / 10) + 1;
+            int yCount = (int)Math.ceil(_galaxyDimension.y / 10) + 1;
+
+            g2.setStroke(new BasicStroke(3));
+            g2.setColor(Color.WHITE);
+
+            for (int x = 0; x < xCount; x++) {
+                int xPos = (int)(x * 10 * _scaleFactor) + GALAXY_BORDER;
+                g2.drawLine(xPos, getSize().height, xPos, getSize().height - 15);
+
+                String label = ((Integer)(x * 10)).toString();
+                g2.drawString(label, xPos + 4, getSize().height);
+            }
+
+            for (int y = 0; y < yCount; y++) {
+                int yPos = getSize().height - (int)(y * 10 * _scaleFactor) - GALAXY_BORDER;
+                g2.drawLine(0, yPos, 15, yPos);
+
+                String label = ((Integer)(y * 10)).toString();
+                g2.drawString(label, 1, yPos - 4);
+            }
+        }
+
         private void drawStar(Graphics2D g2, DPoint star, Color color, int diameter) {
             int x = getStarX(star) - diameter / 2;
             int y = getStarY(star) - diameter / 2;
@@ -213,12 +226,12 @@ public class UI extends Frame {
         }
 
         private int getStarX(DPoint star) {
-            return ((int)((star.x - _galaxyOffset.x) * _scaleFactor)) + 10;
+            return ((int)((star.x - _galaxyOffset.x) * _scaleFactor)) + GALAXY_BORDER;
         }
 
         private int getStarY(DPoint star) {
             int canvasHeight = getSize().height;
-            return (canvasHeight - (int)((star.y - _galaxyOffset.y) * _scaleFactor)) + 10;
+            return (canvasHeight - (int)((star.y - _galaxyOffset.y) * _scaleFactor)) - GALAXY_BORDER;
         }
     }
 }
