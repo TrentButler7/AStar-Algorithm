@@ -6,15 +6,15 @@ public class UI extends Frame {
     /**
      * Gets the size of the galaxy.
      */
-    private Dimension _galaxyDimension;
+    private DPoint _galaxyDimension;
 
     /**
      * Gets the amount by which each star should be shifted
      * when painting, in order to fit on a (0, 0) rooted canvas
      */
-    private Point _galaxyOffset;
+    private DPoint _galaxyOffset;
 
-    public UI(List<Point> starList, Path path, int maxD) {
+    public UI(List<DPoint> starList, Path path, int maxD) {
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent ev) {
@@ -40,19 +40,19 @@ public class UI extends Frame {
         setVisible(true);
     }
 
-    private void calculateGalaxyDimensions(List<Point> starList) {
+    private void calculateGalaxyDimensions(List<DPoint> starList) {
         if (starList.size() <= 0) {
             return;
         }
 
-        Point initial = starList.get(0);
-        int left = initial.x;
-        int top = initial.y;
-        int width = initial.x;
-        int height = initial.y;
+        DPoint initial = starList.get(0);
+        double left = initial.x;
+        double top = initial.y;
+        double width = initial.x;
+        double height = initial.y;
 
         // Find the outermost bounds of the star positions
-        for (Point p : starList) {
+        for (DPoint p : starList) {
             if (p.x < left) {
                 left = p.x;
             }
@@ -73,18 +73,18 @@ public class UI extends Frame {
         width -= left;
         height -= top;
 
-        _galaxyDimension = new Dimension(width, height);
-        _galaxyOffset = new Point(left, top);
+        _galaxyDimension = new DPoint(width, height);
+        _galaxyOffset = new DPoint(left, top);
     }
 
     private class MyCanvas extends Canvas {
-        private final List<Point> _starPoints;
+        private final List<DPoint> _starPoints;
         private final Path _path;
         private final int _maxTravelDistance;
 
         private double _scaleFactor;
 
-        public MyCanvas(List<Point> starPoints, Path path, int maxTravelDistance) {
+        public MyCanvas(List<DPoint> starPoints, Path path, int maxTravelDistance) {
             _starPoints = starPoints;
             _path = path;
             _maxTravelDistance = maxTravelDistance;
@@ -104,25 +104,25 @@ public class UI extends Frame {
             Graphics2D g2 = (Graphics2D)g;
             Dimension d = this.getSize();
 
-            double scaleX = d.getWidth() / _galaxyDimension.getWidth();
-            double scaleY = d.getHeight() / _galaxyDimension.getHeight();
+            double scaleX = d.getWidth() / _galaxyDimension.getX();
+            double scaleY = d.getHeight() / _galaxyDimension.getY();
             _scaleFactor = scaleY;
             if (scaleX < scaleY) {
                 _scaleFactor = scaleX;
             }
 
             // Draw each star
-            for (Point star : _starPoints) {
+            for (DPoint star : _starPoints) {
                 drawStar(g2, star, Color.RED, 10);
             }
 
-            List<Point> pathPoints = _path.getPoints();
+            List<DPoint> pathPoints = _path.getPoints();
             if (pathPoints.size() == 0) {
                 return;
             }
 
             // Draw the start and goal stars
-            Point start = pathPoints.get(0);
+            DPoint start = pathPoints.get(0);
             drawStar(g2, start, Color.PINK, 20);
             drawStar(g2, _path.getGoal(), Color.CYAN, 20);
 
@@ -136,8 +136,8 @@ public class UI extends Frame {
             // Draw the path
             g2.setStroke(new BasicStroke(2));
             g2.setColor(Color.BLACK);
-            Point lastPathPoint = null;
-            for (Point p : pathPoints) {
+            DPoint lastPathPoint = null;
+            for (DPoint p : pathPoints) {
                 if (lastPathPoint == null) {
                     lastPathPoint = p;
                     continue;
@@ -148,7 +148,7 @@ public class UI extends Frame {
             }
         }
 
-        private void drawStar(Graphics2D g2, Point star, Color color, int diameter) {
+        private void drawStar(Graphics2D g2, DPoint star, Color color, int diameter) {
             int x = getStarX(star) - diameter / 2;
             int y = getStarY(star) - diameter / 2;
 
@@ -160,11 +160,11 @@ public class UI extends Frame {
             g2.fillOval(x, y, diameter, diameter);
         }
 
-        private int getStarX(Point star) {
+        private int getStarX(DPoint star) {
             return ((int)((star.x - _galaxyOffset.x) * _scaleFactor)) + 10;
         }
 
-        private int getStarY(Point star) {
+        private int getStarY(DPoint star) {
             int canvasHeight = getSize().height;
             return (canvasHeight - (int)((star.y - _galaxyOffset.y) * _scaleFactor)) + 10;
         }

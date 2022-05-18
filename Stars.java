@@ -1,4 +1,3 @@
-import java.awt.Point;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
@@ -10,12 +9,12 @@ import java.util.TreeMap;
  */
 public class Stars {
 
-    private final List<Point> _allPoints;
+    private final List<DPoint> _allPoints;
 
-    private Point _goal;
+    private DPoint _goal;
     private int _maxD = 0;
 
-    public Stars(List<Point> starPoints) {
+    public Stars(List<DPoint> starPoints) {
         _allPoints = starPoints;
     }
     
@@ -51,7 +50,7 @@ public class Stars {
             return;
         }
 
-        new UI(stars._allPoints, finalPath, maxTravelDistance * 100);
+        new UI(stars._allPoints, finalPath, maxTravelDistance);
     }
 
     /**
@@ -61,16 +60,16 @@ public class Stars {
      * @return A new Stars instance, or null if the creation failed.
      */
     public static Stars CreateFromFile(String fileName) {
-        ArrayList<Point> starPoints = new ArrayList<>();
+        ArrayList<DPoint> starPoints = new ArrayList<>();
 
         try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
             String line;
 
             while ((line = br.readLine()) != null) {
                 String[] values = line.split(",");
-                double d1 = Double.parseDouble(values[0]) * 100;
-                double d2 = Double.parseDouble(values[1]) * 100;
-                starPoints.add(new Point((int)d1,(int)d2));
+                double d1 = Double.parseDouble(values[0]);
+                double d2 = Double.parseDouble(values[1]);
+                starPoints.add(new DPoint(d1, d2));
             }
 
             return new Stars(starPoints);
@@ -100,7 +99,7 @@ public class Stars {
         }
 
         _goal = _allPoints.get(goalIndex);
-        _maxD = maxTravelDistance * 100;
+        _maxD = maxTravelDistance;
 
         TreeMap<Double, Path> pathMap = initializePath(_allPoints, startIndex);
         while (pathMap.size() > 0) {
@@ -127,7 +126,7 @@ public class Stars {
         Path currentPath = pathMap.firstEntry().getValue();
         pathMap.remove(currentPath.getFValue());
 
-        for (Point newPoint: _allPoints) {
+        for (DPoint newPoint: _allPoints) {
             // Ensure that the point isn't already in the path.
             // Prevents us from creating a looping path
             if (currentPath.getPoints().contains(newPoint)) {
@@ -135,7 +134,7 @@ public class Stars {
             }
 
             // Check that this point is within range of the edge of the path
-            if (Util.getEuclidean(currentPath.getLastPoint(), newPoint) > _maxD) {
+            if (currentPath.getLastPoint().fastDistance(newPoint) > _maxD) {
                 continue;
             }
 
@@ -172,7 +171,7 @@ public class Stars {
      * @param startIndex The index of the starting point
      * @return A map to be used to contain all the paths and keep them in sorted order
      */
-    private TreeMap<Double, Path> initializePath(List<Point> points, int startIndex){
+    private TreeMap<Double, Path> initializePath(List<DPoint> points, int startIndex){
         TreeMap<Double, Path> pathMap = new TreeMap<>();
         Path firstPath = new Path(points.get(startIndex), _goal);
         pathMap.put(firstPath.getFValue(), firstPath);

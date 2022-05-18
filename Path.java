@@ -1,23 +1,22 @@
-import java.awt.Point;
 import java.util.ArrayList;
 
 public class Path implements Comparable<Path>, Cloneable {
     /**
      * The points contained in this path
      */
-    private ArrayList<Point> _points; 
+    private ArrayList<DPoint> _points; 
     private double _heuristic;
     private double _cost;
-    private Point _goal;
+    private DPoint _goal;
 
     /**
      * Creates a new path with a single point
      * @param first The starting point of the ship
      */
-    public Path(Point first, Point goal){
-        _points = new ArrayList<>();
+    public Path(DPoint first, DPoint goal){
+        _points = new ArrayList<DPoint>();
         _points.add(first);
-        _heuristic = Util.getEuclidean(first, goal);
+        _heuristic = first.fastDistance(goal);
         _cost = 0; //added only the start points, have not travelled
         _goal = goal;
     }
@@ -26,12 +25,12 @@ public class Path implements Comparable<Path>, Cloneable {
      * Gets the the list of points in the path
      * @return The ArrayList of points in the current path
      */
-    public ArrayList<Point> getPoints() {
+    public ArrayList<DPoint> getPoints() {
         return _points;
     }
 
-    public Point getGoal() {
-        return (Point)_goal.clone();
+    public DPoint getGoal() {
+        return (DPoint)_goal.clone();
     }
 
     public Double getFValue() {
@@ -42,7 +41,7 @@ public class Path implements Comparable<Path>, Cloneable {
      * Gets the last (most recent) point in the path.
      * @return The last point to be added to the path.
      */
-    public Point getLastPoint() {
+    public DPoint getLastPoint() {
         return _points.get(_points.size() - 1);
     }
 
@@ -50,10 +49,12 @@ public class Path implements Comparable<Path>, Cloneable {
      * Adds a new point to a path and calculates the new cost and heuristic
      * @param point
      */
-    public void add(Point point) {
+    public void add(DPoint point) {
         _points.add(point);
-        _heuristic = Util.getEuclidean(point, _goal);
-        _cost += Util.getEuclidean(point, _points.get(_points.size() - 2)); //-2 since we want the latest point and the previous point since that was the last distance travelled
+        _heuristic = point.fastDistance(_goal);
+
+        // -2 since we want the latest point and the previous point since that was the last distance travelled
+        _cost += point.fastDistance(_points.get(_points.size() - 2));
     }
 
     /**
@@ -74,7 +75,7 @@ public class Path implements Comparable<Path>, Cloneable {
     protected Object clone() {
         try {
             Path clone = (Path)super.clone();
-            clone._points = (ArrayList<Point>)this.getPoints().clone();
+            clone._points = (ArrayList<DPoint>)this.getPoints().clone();
 
             return clone;
         }
@@ -91,12 +92,10 @@ public class Path implements Comparable<Path>, Cloneable {
     }
 
     public void print() {
-        for (Point point : _points) {
-            double x = point.getX() / 100.0;
-            double y = point.getY() / 100.0;
-            System.out.println(x + "," + y);
+        for (DPoint point : _points) {
+            System.out.println(point.x + "," + point.y);
         }
-        _cost /= 100;
+
         System.out.println("C: " + _cost);
     }
 }
