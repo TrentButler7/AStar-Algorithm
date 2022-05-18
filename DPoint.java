@@ -37,8 +37,7 @@ public class DPoint implements Cloneable {
             min = x;
         }
 
-        double result = (1007.0 / 1024.0) * max + (441.0 / 1024.0) * min;
-        return result;
+        return (1007.0 / 1024.0) * max + (441.0 / 1024.0) * min;
     }
 
     /**
