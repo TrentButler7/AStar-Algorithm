@@ -117,6 +117,7 @@ public class UI extends Frame {
                 return;
             }
 
+            drawScale(g2);
             drawPath(g2);
 
             // Draw each star
@@ -133,8 +134,6 @@ public class UI extends Frame {
             for (int i = 1; i < pathPoints.size() - 1; i++) {
                 drawStar(g2, pathPoints.get(i), Color.WHITE, 4);
             }
-
-            drawScale(g2);
         }
 
         private void drawPath(Graphics2D g2) {
@@ -201,7 +200,7 @@ public class UI extends Frame {
                 g2.drawLine(xPos, getSize().height, xPos, getSize().height - 15);
 
                 String label = ((Integer)(x * 10)).toString();
-                g2.drawString(label, xPos + 4, getSize().height);
+                g2.drawString(label, xPos + 4, getSize().height - 4);
             }
 
             for (int y = 0; y < yCount; y++) {
