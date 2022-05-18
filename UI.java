@@ -73,8 +73,7 @@ public class UI extends Frame {
         private final Path _path;
         private final int _maxTravelDistance;
 
-        private double _scaleX;
-        private double _scaleY;
+        private double _scaleFactor;
 
         public MyCanvas(List<Point> starPoints, Path path, int maxTravelDistance) {
             _starPoints = starPoints;
@@ -96,8 +95,12 @@ public class UI extends Frame {
             Graphics2D g2 = (Graphics2D)g;
             Dimension d = this.getSize();
 
-            _scaleX = d.getWidth() / _galaxyDimension.getWidth();
-            _scaleY = d.getHeight() / _galaxyDimension.getHeight();
+            double scaleX = d.getWidth() / _galaxyDimension.getWidth();
+            double scaleY = d.getHeight() / _galaxyDimension.getHeight();
+            _scaleFactor = scaleY;
+            if (scaleX < scaleY) {
+                _scaleFactor = scaleX;
+            }
 
             // Draw each star
             for (Point star : _starPoints) {
@@ -115,12 +118,13 @@ public class UI extends Frame {
             drawStar(g2, _path.getGoal(), Color.CYAN, 20);
 
             // Draw the maximum travel distance
-            int mdx = (int)(_maxTravelDistance * _scaleX);
-            int mdy = (int)(_maxTravelDistance * _scaleY);
+            int mdx = (int)(_maxTravelDistance * _scaleFactor);
+            int mdy = (int)(_maxTravelDistance * _scaleFactor);
             g2.setStroke(new BasicStroke(5));
             g2.setColor(Color.GREEN);
             g2.drawOval(getStarX(start) - mdx / 2, getStarY(start) - mdy / 2, mdx, mdy);
 
+            // Draw the path
             g2.setStroke(new BasicStroke(2));
             g2.setColor(Color.BLACK);
             Point lastPathPoint = null;
@@ -148,12 +152,12 @@ public class UI extends Frame {
         }
 
         private int getStarX(Point star) {
-            return ((int)((star.x - _galaxyOffset.x) * _scaleX)) + 10;
+            return ((int)((star.x - _galaxyOffset.x) * _scaleFactor)) + 10;
         }
 
         private int getStarY(Point star) {
             int canvasHeight = getSize().height;
-            return (canvasHeight - (int)((star.y - _galaxyOffset.y) * _scaleY)) + 10;
+            return (canvasHeight - (int)((star.y - _galaxyOffset.y) * _scaleFactor)) + 10;
         }
     }
 }
