@@ -51,6 +51,8 @@ public class Stars {
         else {
             System.out.println("No Path found");
         }
+
+        new UI(stars._allPoints, finalPath, maxTravelDistance);
     }
 
     /**
