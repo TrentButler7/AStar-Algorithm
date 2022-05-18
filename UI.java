@@ -2,6 +2,13 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.List;
 
+/**
+ * Contains logic to display a UI that visualises
+ * the outcome of an A-Star operation.
+ * 
+ * @author Carl Stephens (1505521)
+ * @author Trent Butler (1522993)
+ */
 public class UI extends Frame {
     /**
      * Gets the size of the galaxy.
@@ -94,6 +101,8 @@ public class UI extends Frame {
         @Override
         public Dimension getSize() {
             Dimension d = super.getSize();
+
+            // Give ourselves a fake border
             d.width -= 20;
             d.height -=20;
 

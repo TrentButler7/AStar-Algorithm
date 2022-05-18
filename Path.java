@@ -1,5 +1,11 @@
 import java.util.ArrayList;
 
+/**
+ * Represents an A-Star frontier path.
+ * 
+ * @author Trent Butler (1522993)
+ * @author Carl Stephens (1505521)
+ */
 public class Path implements Comparable<Path>, Cloneable {
     /**
      * The points contained in this path

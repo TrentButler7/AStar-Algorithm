@@ -5,7 +5,10 @@ import java.util.List;
 import java.util.TreeMap;
 
 /**
- * Stars
+ * Contains an A-Star pathfinding algorithm implementation.
+ * 
+ * @author Trent Butler (1522993)
+ * @author Carl Stephens (1505521)
  */
 public class Stars {
 

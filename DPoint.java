@@ -1,3 +1,10 @@
+/**
+ * Represents a Euclidian coordinate point,
+ * with double floating point precision.
+ * 
+ * @author Carl Stephens (1505521)
+ * @author Trent Butler (1522993)
+ */
 public class DPoint implements Cloneable {
     public double x;
     public double y;
