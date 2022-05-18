@@ -126,6 +126,7 @@ public class Stars {
         Path currentPath = pathMap.firstEntry().getValue();
         pathMap.remove(currentPath.getFValue());
 
+        // TODO: Debug. I suspect there's a loop here with small D-values. Try java Stars .\spiral_v2.csv 3 10 8
         for (DPoint newPoint: _allPoints) {
             // Ensure that the point isn't already in the path.
             // Prevents us from creating a looping path

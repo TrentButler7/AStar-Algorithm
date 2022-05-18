@@ -33,6 +33,7 @@ public class UI extends Frame {
 
         Dimension screenDimension = Toolkit.getDefaultToolkit().getScreenSize();
         setSize(screenDimension);
+        setBackground(new Color(0x1b, 0x1b, 0x1e));
 
         add(new MyCanvas(starList, path, maxD));
         calculateGalaxyDimensions(starList);
@@ -111,41 +112,83 @@ public class UI extends Frame {
                 _scaleFactor = scaleX;
             }
 
-            // Draw each star
-            for (DPoint star : _starPoints) {
-                drawStar(g2, star, Color.RED, 10);
-            }
-
             List<DPoint> pathPoints = _path.getPoints();
             if (pathPoints.size() == 0) {
                 return;
             }
 
+            drawPath(g2);
+
+            // Draw each star
+            for (DPoint star : _starPoints) {
+                drawStar(g2, star, Color.RED, 10);
+            }
+            
+            drawMaxTravelDistance(g2);
             // Draw the start and goal stars
-            DPoint start = pathPoints.get(0);
-            drawStar(g2, start, Color.PINK, 20);
-            drawStar(g2, _path.getGoal(), Color.CYAN, 20);
+            drawEndpointStars(g2);
 
-            // Draw the maximum travel distance
-            int mdx = (int)(_maxTravelDistance * _scaleFactor);
-            int mdy = (int)(_maxTravelDistance * _scaleFactor);
-            g2.setStroke(new BasicStroke(5));
-            g2.setColor(Color.GREEN);
-            g2.drawOval(getStarX(start) - mdx / 2, getStarY(start) - mdy / 2, mdx, mdy);
+            // Draw markers to explicitly show the stars that the path is moving through
+            g2.setColor(Color.WHITE);
+            for (int i = 1; i < pathPoints.size() - 1; i++) {
+                drawStar(g2, pathPoints.get(i), Color.WHITE, 4);
+            }
+        }
 
-            // Draw the path
+        private void drawPath(Graphics2D g2) {
             g2.setStroke(new BasicStroke(2));
-            g2.setColor(Color.BLACK);
+            g2.setColor(Color.WHITE);
             DPoint lastPathPoint = null;
-            for (DPoint p : pathPoints) {
+            for (DPoint p : _path.getPoints()) {
                 if (lastPathPoint == null) {
                     lastPathPoint = p;
                     continue;
                 }
 
-                g2.drawLine(getStarX(lastPathPoint), getStarY(lastPathPoint), getStarX(p), getStarY(p));
+                g2.drawLine(
+                    getStarX(lastPathPoint),
+                    getStarY(lastPathPoint),
+                    getStarX(p),
+                    getStarY(p)
+                );
                 lastPathPoint = p;
             }
+        }
+
+        private void drawEndpointStars(Graphics2D g2) {
+            DPoint start = _path.getPoints().get(0);
+            drawStar(g2, start, Color.CYAN, 20);
+            drawStar(g2, _path.getGoal(), Color.CYAN, 20);
+
+            Font font = new Font(g2.getFont().getName(), Font.BOLD, 20);
+            g2.setFont(font);
+            g2.setColor(Color.BLACK);
+
+            g2.drawChars(
+                "S".toCharArray(),
+                0,
+                1,
+                getStarX(start) - 6,
+                getStarY(start) + 8
+            );
+
+            g2.drawChars(
+                "G".toCharArray(),
+                0,
+                1,
+                getStarX(_path.getGoal()) - 8,
+                getStarY(_path.getGoal()) + 8
+            );
+        }
+
+        private void drawMaxTravelDistance(Graphics2D g2) {
+            DPoint start = _path.getPoints().get(0);
+            int mdx = (int)(_maxTravelDistance * _scaleFactor);
+            int mdy = (int)(_maxTravelDistance * _scaleFactor);
+
+            g2.setStroke(new BasicStroke(3));
+            g2.setColor(Color.GREEN);
+            g2.drawOval(getStarX(start) - mdx, getStarY(start) - mdy, mdx * 2, mdy * 2);
         }
 
         private void drawStar(Graphics2D g2, DPoint star, Color color, int diameter) {
@@ -153,7 +196,7 @@ public class UI extends Frame {
             int y = getStarY(star) - diameter / 2;
 
             g2.setStroke(new BasicStroke(diameter / 10));
-            g2.setColor(Color.BLACK);
+            g2.setColor(Color.WHITE);
             g2.drawOval(x, y, diameter, diameter);
 
             g2.setColor(color);
