@@ -52,7 +52,7 @@ public class Stars {
             System.out.println("No Path found");
         }
 
-        new UI(stars._allPoints, finalPath, maxTravelDistance);
+        new UI(stars._allPoints, finalPath, maxTravelDistance * 100);
     }
 
     /**
@@ -121,7 +121,7 @@ public class Stars {
      * @return If the Path did indeed contain a goal
      */
     private Boolean checkPath(Path path){
-        ArrayList<Point> pathList = path.getList();
+        ArrayList<Point> pathList = path.getPoints();
         if (pathList.get(pathList.size() - 1) == _goal) {
             return true;
         }
@@ -139,11 +139,11 @@ public class Stars {
         for (int i = 0; i < _allPoints.size(); i++) {
             Point newPoint = _allPoints.get(i);
             //Checks if the current path includes the point, if so move on since we dont want to get into a loop
-            if (currentPath.getList().contains(newPoint)) {
+            if (currentPath.getPoints().contains(newPoint)) {
                 continue;
             }
             //Checks if the point is within the Max distance
-            else if (Util.getEuclidean(currentPath.getList().get(currentPath.getList().size() - 1), newPoint) > _maxD) {
+            else if (Util.getEuclidean(currentPath.getPoints().get(currentPath.getPoints().size() - 1), newPoint) > _maxD) {
                 continue;
             }
 
@@ -162,7 +162,7 @@ public class Stars {
 
             while(iterator.hasNext()){
                 Map.Entry<Double, Path> entry = iterator.next();
-                ArrayList<Point> pathList = entry.getValue().getList();
+                ArrayList<Point> pathList = entry.getValue().getPoints();
                 if(pathList.get(pathList.size() - 1).equals(newPoint)){
                     if (newPath.getfValue() < entry.getValue().getfValue()) { //If the new path is better, add it to the map and remove the old path
                         pathMap.put(newPath.getfValue(), newPath);

@@ -27,7 +27,7 @@ public class Path implements Comparable<Path>, Cloneable {
      * @param path The path to be copied
      */
     public Path(Path path) { //! might need to be changed to add new point in this method
-        _points = (ArrayList<Point>)path.getList().clone();
+        _points = (ArrayList<Point>)path.getPoints().clone();
         _heuristic = Util.getEuclidean(_points.get(_points.size() - 1), _goal);
         _cost = Util.getEuclidean(_points.get(_points.size() - 1) , _points.get(_points.size() - 2)); 
     }
@@ -36,8 +36,12 @@ public class Path implements Comparable<Path>, Cloneable {
      * Gets the the list of points in the path
      * @return The ArrayList of points in the current path
      */
-    public ArrayList<Point> getList() {
+    public ArrayList<Point> getPoints() {
         return _points;
+    }
+
+    public Point getGoal() {
+        return (Point)_goal.clone();
     }
 
     /**
@@ -49,7 +53,7 @@ public class Path implements Comparable<Path>, Cloneable {
         try
         {
             clone = (Path) super.clone();
-            clone._points = (ArrayList<Point>)this.getList().clone();
+            clone._points = (ArrayList<Point>)this.getPoints().clone();
         }
         catch (CloneNotSupportedException e) 
         {
@@ -76,14 +80,6 @@ public class Path implements Comparable<Path>, Cloneable {
     public int compareTo(Path comparePath) {
         // Negate the comparison as we want smaller F-values to be placed at the top of the queue.
         return 0 - this.getfValue().compareTo(comparePath.getfValue());
-
-        // if (myFValue > theirFValue) {
-        //     return -1; //Returns -1 if the f value for this path is smaller than that of the given path (to give ascending order)
-        // }
-        // else if (myFValue == theirFValue){
-        //     return 0;
-        // }
-        // else return 1; //Returns 1 if the f value for this path is larger than that of the given path (to give ascending order)
     }
 
     public void print() {

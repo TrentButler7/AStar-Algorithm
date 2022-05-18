@@ -3,12 +3,16 @@ import java.awt.event.*;
 import java.util.List;
 
 public class UI extends Frame {
-    private double _xScaleFactor = 1;
-    private double _yScaleFactor = 1;
-    private double _canvasHeight;
-    private double _canvasWidth;
-    private int _xOffset;
-    private int _yOffset;
+    /**
+     * Gets the size of the galaxy.
+     */
+    private Dimension _galaxyDimension;
+
+    /**
+     * Gets the amount by which each star should be shifted
+     * when painting, in order to fit on a (0, 0) rooted canvas
+     */
+    private Point _galaxyOffset;
 
     public UI(List<Point> starList, Path path, int maxD) {
         addWindowListener(new WindowAdapter() {
@@ -18,29 +22,27 @@ public class UI extends Frame {
             }
         });
 
-        add(new MyCanvas(starList));
+        Dimension screenDimension = Toolkit.getDefaultToolkit().getScreenSize();
+        setSize(screenDimension);
 
-        setWindowSize(starList);
+        add(new MyCanvas(starList, path, maxD));
+        calculateGalaxyDimensions(starList);
         setTitle("Pathfind Visualisation");
         setVisible(true);
     }
 
-    private void setWindowSize(List<Point> starList) {
+    private void calculateGalaxyDimensions(List<Point> starList) {
         if (starList.size() <= 0) {
             return;
         }
 
-        Dimension screenDimensions = Toolkit.getDefaultToolkit().getScreenSize();
-        _canvasWidth = screenDimensions.getWidth() - 16;
-        _canvasHeight = screenDimensions.getHeight() - 64;
-
         Point initial = starList.get(0);
-
         int left = initial.x;
         int top = initial.y;
         int width = initial.x;
         int height = initial.y;
 
+        // Find the outermost bounds of the star positions
         for (Point p : starList) {
             if (p.x < left) {
                 left = p.x;
@@ -57,47 +59,101 @@ public class UI extends Frame {
             }
         }
 
-        // Correct the coordinates to begin at (0, 0)
+        // If the top-left corner does not begin at (0, 0),
+        // this corrects it so we get the right width/height
         width -= left;
         height -= top;
-        _xOffset = left;
-        _yOffset = top;
 
-        System.out.println(width);
-
-        if (width > _canvasWidth) {
-            _xScaleFactor = _canvasWidth / width;
-        }
-        if (height > _canvasHeight) {
-            _yScaleFactor = _canvasHeight / height;
-        }
-
-        width *= _xScaleFactor;
-        height *= _yScaleFactor;
-        setSize(width, height);
+        _galaxyDimension = new Dimension(width, height);
+        _galaxyOffset = new Point(left, top);
     }
 
     private class MyCanvas extends Canvas {
         private final List<Point> _starPoints;
+        private final Path _path;
+        private final int _maxTravelDistance;
 
-        public MyCanvas(List<Point> starPoints) {
+        private double _scaleX;
+        private double _scaleY;
+
+        public MyCanvas(List<Point> starPoints, Path path, int maxTravelDistance) {
             _starPoints = starPoints;
+            _path = path;
+            _maxTravelDistance = maxTravelDistance;
+        }
+
+        @Override
+        public Dimension getSize() {
+            Dimension d = super.getSize();
+            d.width -= 20;
+            d.height -=20;
+
+            return d;
         }
 
         @Override
         public void paint(Graphics g) {
             Graphics2D g2 = (Graphics2D)g;
+            Dimension d = this.getSize();
 
+            _scaleX = d.getWidth() / _galaxyDimension.getWidth();
+            _scaleY = d.getHeight() / _galaxyDimension.getHeight();
+
+            // Draw each star
             for (Point star : _starPoints) {
-                int x = (int)((star.x - _xOffset) * _xScaleFactor) + 5;
-                int y = (int)_canvasHeight - (int)((star.y - _yOffset) * _yScaleFactor) + 5;
-
-                g2.setColor(Color.BLACK);
-                g2.drawOval(x - 5, y - 5, 10, 10);
-
-                g2.setColor(Color.RED);
-                g2.fillOval(x - 5, y - 5, 10, 10);
+                drawStar(g2, star, Color.RED, 10);
             }
+
+            List<Point> pathPoints = _path.getPoints();
+            if (pathPoints.size() == 0) {
+                return;
+            }
+
+            // Draw the start and goal stars
+            Point start = pathPoints.get(0);
+            drawStar(g2, start, Color.PINK, 20);
+            drawStar(g2, _path.getGoal(), Color.CYAN, 20);
+
+            // Draw the maximum travel distance
+            int mdx = (int)(_maxTravelDistance * _scaleX);
+            int mdy = (int)(_maxTravelDistance * _scaleY);
+            g2.setStroke(new BasicStroke(5));
+            g2.setColor(Color.GREEN);
+            g2.drawOval(getStarX(start) - mdx / 2, getStarY(start) - mdy / 2, mdx, mdy);
+
+            g2.setStroke(new BasicStroke(2));
+            g2.setColor(Color.BLACK);
+            Point lastPathPoint = null;
+            for (Point p : pathPoints) {
+                if (lastPathPoint == null) {
+                    lastPathPoint = p;
+                    continue;
+                }
+
+                g2.drawLine(getStarX(lastPathPoint), getStarY(lastPathPoint), getStarX(p), getStarY(p));
+                lastPathPoint = p;
+            }
+        }
+
+        private void drawStar(Graphics2D g2, Point star, Color color, int diameter) {
+            int x = getStarX(star) - diameter / 2;
+            int y = getStarY(star) - diameter / 2;
+
+            g2.setStroke(new BasicStroke(diameter / 10));
+            g2.setColor(Color.BLACK);
+            g2.drawOval(x, y, diameter, diameter);
+
+            g2.setColor(color);
+            g2.fillOval(x, y, diameter, diameter);
+        }
+
+        private int getStarX(Point star) {
+            return ((int)((star.x - _galaxyOffset.x) * _scaleX)) + 10;
+        }
+
+        private int getStarY(Point star) {
+            int canvasHeight = getSize().height;
+            return (canvasHeight - (int)((star.y - _galaxyOffset.y) * _scaleY)) + 10;
         }
     }
 }
