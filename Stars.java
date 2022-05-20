@@ -155,7 +155,7 @@ public class Stars {
 
                 // Is our new path better than the old path?
                 if (element.getFValue() < newPath.getFValue()) {
-                    break outerLoop;
+                    continue outerLoop;
                 }
 
                 // Replace with the more efficient path
